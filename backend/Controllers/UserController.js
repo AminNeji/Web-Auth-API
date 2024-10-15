@@ -1,5 +1,6 @@
 const express = require('express');
 const user = require('../Models/UserModel');
+const jwt= require('jsonwebtoken');
 const login = async (req, res) => {
     const { username, password } = req.params;
     const founduser = await user.findOne({ username: username })
@@ -10,6 +11,11 @@ const login = async (req, res) => {
     if (founduser.password != password) {
         return res.status(400).json({ message: "wrong password" })
     }
+    const userPayload = founduser.toObject();
+    const token=jwt.sign(userPayload,process.env.TOKEN,{expiresIn:'1h'});
+    res.cookie("token",token,{
+        httpOnly:true,
+    })
     return res.status(200).json(founduser);
 
 }
